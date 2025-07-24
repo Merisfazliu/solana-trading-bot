@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solana Trading Bot</title>
+</head>
+<body>
+    <h1>Solana Trading Bot Dashboard</h1>
+    <h2>Tokens</h2>
+    <table border="1">
+        <tr>
+            <th>Symbol</th>
+            <th>Price (USD)</th>
+            <th>Volume (24h)</th>
+            <th>Liquidity</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for token in tokens %}
+        <tr>
+            <td>{{ token.symbol }}</td>
+            <td>{{ token.price_usd }}</td>
+            <td>{{ token.volume_24h }}</td>
+            <td>{{ token.liquidity_usd }}</td>
+            <td>{{ token.solsniffer_status }}</td>
+            <td>
+                <form method="POST" action="/trade">
+                    <input type="hidden" name="token_address" value="{{ token.token_address }}">
+                    <input type="submit" name="action" value="Buy">
+                    <input type="submit" name="action" value="Sell">
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
