@@ -1,0 +1,22 @@
+{
+  "filters": {
+    "min_volume_24h": 10000,
+    "min_liquidity_usd": 5000,
+    "min_price_usd": 0.0001,
+    "max_price_change_1h": 500
+  },
+  "coin_blacklist": [],
+  "dev_blacklist": [],
+  "rpc_endpoint": "https://api.mainnet-beta.solana.com",
+  "helius_api_key": "50f922ba-1954-4c81-b165-aab778f87f5d",
+  "solsniffer_api_url": "https://api.solsniffer.com/v1/token",
+  "solsniffer_api_key": "0luuwgfig5828jmnb5spwxm80jemry",
+  "solana_tracker_api_url": "https://api.solanatracker.io/rugcheck",
+  "solana_tracker_api_key": "efd6eb5d-26ff-4730-b44b-ed8aef88bc4a",
+  "telegram_notification_bot_token": "8147334485:AAHkUoQjk7M_Xvx-uMg5opuQRGRaStRH4Z0",
+  "telegram_notification_chat_id": "7430635873",
+  "toxisol_bot_username": "@ToxiSolBot",
+  "toxisol_user_wallet": "956FpaMnWhqK91NtD4xbjwTvCbtcGXWHpPSCDmXb9WoMq",
+  "ui_port": 10000,
+  "toxisol_slippage": 5
+}
