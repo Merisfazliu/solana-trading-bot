@@ -8,12 +8,13 @@ import json
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load configuration
 try:
     with open('config.json') as f:
         config = json.load(f)
+    logging.info("Successfully loaded config.json")
 except FileNotFoundError:
     logging.error("config.json not found, using defaults")
     config = {
@@ -29,7 +30,7 @@ except FileNotFoundError:
         "toxisol_slippage": 5
     }
 
-# Environment variables
+# Environment variables (override config.json if set)
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_NOTIFICATION_BOT_TOKEN', config.get('telegram_notification_bot_token'))
 CHAT_ID = os.getenv('TELEGRAM_NOTIFICATION_CHAT_ID', config.get('telegram_notification_chat_id'))
 DEXSCREENER_API_URL = "https://api.dexscreener.com/latest/dex/tokens"
@@ -38,11 +39,13 @@ bot = Bot(token=TELEGRAM_TOKEN) if TELEGRAM_TOKEN else None
 
 def get_tokens():
     """Fetch tokens from DexScreener with filters."""
+    logging.info("Attempting to fetch tokens from DexScreener")
     try:
         response = requests.get(DEXSCREENER_API_URL, timeout=10)
         response.raise_for_status()
         data = response.json()
         tokens = data.get('pairs', [])
+        logging.info(f"Fetched {len(tokens)} token pairs from DexScreener")
 
         filtered_tokens = []
         for token in tokens:
@@ -58,6 +61,7 @@ def get_tokens():
                 hours_old = token_age.total_seconds() / 3600
             except:
                 hours_old = 0
+                logging.warning(f"Invalid createdAt for token {token.get('baseToken', {}).get('symbol', 'UNKNOWN')}")
 
             if (liquidity >= config['filters']['min_liquidity_usd'] and
                 volume_24h >= config['filters']['min_volume_24h'] and
@@ -72,6 +76,7 @@ def get_tokens():
                     "solsniffer_status": "Good",  # Placeholder, add Rugcheck if needed
                     "token_address": token.get('baseToken', {}).get('address', 'UNKNOWN')
                 })
+                logging.info(f"Added token {token.get('baseToken', {}).get('symbol', 'UNKNOWN')} to filtered list")
 
         if not filtered_tokens:
             logging.warning("No tokens meet criteria, using mock data")
@@ -93,9 +98,11 @@ def get_tokens():
                     "token_address": "7x8By5twvM3eW3nWv2PB6mjX7u4i8gYvWaJ3pFWCfZ2"
                 }
             ]
+        logging.info(f"Returning {len(filtered_tokens)} tokens")
         return filtered_tokens[:10]
     except requests.exceptions.RequestException as e:
         logging.error(f"Error fetching tokens from DexScreener: {e}")
+        logging.info("Using mock data due to API failure")
         return [
             {
                 "symbol": "TEST",
@@ -112,6 +119,7 @@ async def send_telegram_notification(message):
     if bot and CHAT_ID:
         try:
             await bot.send_message(chat_id=CHAT_ID, text=message)
+            logging.info(f"Sent Telegram notification: {message}")
         except Exception as e:
             logging.error(f"Telegram notification error: {e}")
 
@@ -139,6 +147,7 @@ def trade():
 def debug():
     """Debug endpoint to check token data."""
     tokens = get_tokens()
+    logging.info(f"Debug endpoint accessed, returning {len(tokens)} tokens")
     return {"tokens": tokens}
 
 if __name__ == '__main__':
